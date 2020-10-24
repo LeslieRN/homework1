@@ -11,7 +11,6 @@
 
 #ifndef FUNTION_H_
 #define FUNTION_H_
-
 /**
  * Analysing
  * n evaluations -> description and percentage +
@@ -65,17 +64,17 @@ typedef struct
 } Student;
 
 /*Evaluation functions*/
-Evaluation *insert_evaluction_values(int *, char *);
+void *insert_evaluction_values(int *, char *);
 Evaluation get_evaluation(int *, int, int);
 void printf_evaluation(Evaluation *, int);
 
 /*Grades functions*/
-Grades *insert_grades(int);
-Grades get_grades();
+Grades *insert_grades(int, char *);
+Grades get_grades(char *);
 void printf_grades(Student, int);
 
 /*Student functions*/
-Student *insert_student_values(int *, int, char *, char *);
+void *insert_student_values(int *, int, char *, char *);
 Student get_student(int, char *);
 void printf_students(Student, int);
 int quantity_of_students(char *);
@@ -93,12 +92,13 @@ void show_student_file(char *, int);
 
 /*File functions for evaluation*/
 void insert_evaluation_file(char *, Evaluation *, int);
+int check_if_emty(char *);
 //void insert_evaluation_file(char*, Evaluation*, int);
 
 /*File functions for grades*/
 char calculate_letters(char *, Grades *, int);
 
-Evaluation *insert_evaluction_values(int *number_eval, char *file_name)
+void *insert_evaluction_values(int *number_eval, char *file_name)
 {
     int counter = 0, total_percentage = 0;
     Evaluation *evaluation_values;
@@ -169,7 +169,7 @@ void printf_evaluation(Evaluation *evaluation_inf, int quantity_eval)
     }
 }
 
-Student *insert_student_values(int *quantity_students, int quantity_eval, char *file_name, char *file_name_eval)
+void *insert_student_values(int *quantity_students, int quantity_eval, char *file_name, char *file_name_eval)
 {
     int counter = 0;
     Student *student_value;
@@ -199,7 +199,7 @@ Student get_student(int quantity_eval, char *file_name_eval)
     fflush(stdin);
     printf("Insert the student's name: \n");
     gets(inf_student.name);
-    inf_student.grades = insert_grades(quantity_eval);
+    inf_student.grades = insert_grades(quantity_eval, file_name_eval);
     //calculate the students grades based on the percentage
     //take the a pointer of grades students.. open the evaluation file and calculate based on the percentaje
     //pass quantity evaluation
@@ -209,7 +209,7 @@ Student get_student(int quantity_eval, char *file_name_eval)
     inf_student.letter = calculate_letters(file_name_eval, inf_student.grades, quantity_eval);
     return inf_student;
 }
-Grades *insert_grades(int quantity_eval)
+Grades *insert_grades(int quantity_eval, char *file_name_eval)
 {
     fflush(stdin);
     int counter = 0, total = 0;
@@ -219,25 +219,30 @@ Grades *insert_grades(int quantity_eval)
     //printf("Insert the grade of ")
     //printf("tHis is the quantity od values %d\n", quantity_eval);s
     grade_values = (Grades *)malloc(sizeof(Grades) * quantity_eval);
-
+    FILE *file = open_file(file_name_eval, "r+b");
     do
     {
-        *(grade_values + counter) = get_grades();
+        Evaluation eval_desc;
+        fread(&eval_desc, sizeof(Evaluation), 1, file);
+        *(grade_values + counter) = get_grades(eval_desc.description);
         counter++;
-        //printf("Here i'm grade function\n");
+        printf("Here i'm grade function\n");
     } while (counter < quantity_eval);
+    close_file(file);
     printf("Here i'm grade function\n");
     return grade_values;
 }
 
-Grades get_grades()
+Grades get_grades(char *file_name_eval)
 {
     Grades inf_grade;
     //open evaluation
+
     do
     {
         /* code */
-        printf("Insert the grade\n"); //for %s evaluation \n", (inf_eval + counter)->description);
+
+        printf("Insert the grade for %s: \n", file_name_eval); //for %s evaluation \n", (inf_eval + counter)->description);
         //check if the values inserted is an integer
         scanf("%d", &inf_grade.grade);
         //check if percentage is less or equal to 100%
@@ -245,6 +250,7 @@ Grades get_grades()
         {
             printf("Invalid Value. Please, try again!!\n");
         }
+        strcpy(inf_grade.eval.description, file_name_eval);
     } while (inf_grade.grade < 0 && inf_grade.grade > 100);
 
     //printf("Insert the grade\n"); //for %s evaluation \n", (inf_eval + counter)->description);
@@ -253,7 +259,6 @@ Grades get_grades()
     //scanf("%d", &inf_grade.grade);
     //strcpy((grade_values + counter)->eval.description, inf_eval->description);
     //scanf("%d", (grade_values + counter)->grade);
-    strcpy(inf_grade.eval.description, "Try");
     //close evaluation
 
     return inf_grade;
@@ -263,9 +268,9 @@ void printf_students(Student student_inf, int quantity_eval)
 {
     // for (int i = 0; i < quantity_of_student; i++)
     //{
-    printf("ID: %d Name: %s ", student_inf.id, student_inf.name);
+    printf("ID: %-10d Name: %-20s ", student_inf.id, student_inf.name);
     printf_grades(student_inf, quantity_eval);
-    printf("Letter: %c", student_inf.letter);
+    printf("Letter: %-10c", student_inf.letter);
     printf("\n");
     //}
     return;
@@ -274,7 +279,7 @@ void printf_grades(Student student_inf, int quantity_eval)
 {
     for (int i = 0; i < quantity_eval; i++)
     {
-        printf(" Grade for: %s is %d ", (student_inf.grades + i)->eval.description, (student_inf.grades + i)->grade);
+        printf(" Grade for %-10s: is %-10d ", (student_inf.grades + i)->eval.description, (student_inf.grades + i)->grade);
     }
     return;
 }
@@ -284,8 +289,8 @@ char calculate_letters(char *file_name, Grades *student_grades, int quantity_eva
 {
     FILE *file = open_file(file_name, "rb");
     //int quantity_Students = quantity_of_students(file_name);
-    int counter_read = 0, percentage = 0, grade = 0;
-    int total = 0;
+    int counter_read = 0, grade = 0;
+    float total = 0, percentage = 0;
     char letter_grade = 'L';
     while (counter_read < quantity_eval)
     {
@@ -294,10 +299,10 @@ char calculate_letters(char *file_name, Grades *student_grades, int quantity_eva
         percentage = temp.percentage / 100;
         grade = (student_grades + counter_read)->grade;
         /*printf("This is the calculate letter function\n");*/
-        printf("This is the student grades: %d\n", (student_grades + counter_read)->grade);
-        printf("This is the percentage: %d \n", temp.percentage);
-        total += (percentage * grade);
-        printf("This is the value of total moveee %d\n", (student_grades + counter_read)->grade * temp.percentage / 100);
+        printf("This is the student grades: %d\n", grade);
+        printf("This is the percentage: %f \n", percentage);
+        total += (temp.percentage * grade) / 100;
+        printf("This is the value of total moveee %.2lf\n", total); //(student_grades + counter_read)->grade * temp.percentage / 100);
         //printf_students(temp, quantity_of_evaluation);
         counter_read++;
     }
@@ -392,6 +397,21 @@ void insert_evaluation_file(char *file_name, Evaluation *eval_data, int quantity
     FILE *file = open_file(file_name, "a+b");
     fwrite(eval_data, sizeof(Evaluation) * quantity_eval, 1, file);
     close_file(file);
+}
+
+int check_if_emty(char *file_name_eval)
+{
+    FILE *file = fopen(file_name_eval, "r+b");
+    if (fseek(file, 0L, SEEK_END) == 0)
+    {
+        close_file(file);
+        return 1;
+    }
+    else
+    {
+        close_file(file);
+        return 0;
+    }
 }
 /*void show_student_file(char *file_name, int quantity_of_evaluation)
 {
