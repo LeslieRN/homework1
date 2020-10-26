@@ -31,8 +31,6 @@
  * check if the evalution is 100%, if not keep asking the user
  * check if the values is more than the 100% evaluation, if yes keep asking
  * check if the grade of the studnets is 100 per each evaluation, if not keep asking +
- * make sure the califications and id are numbers
- * make sure that the name is char
 */
 int main()
 {

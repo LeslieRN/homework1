@@ -38,8 +38,6 @@
  * Implicit rules
  * check if the evalution is 100%, if not keep asking the user +
  * check if the values is more than the 100% evaluation, if yes keep asking +
- * make sure the califications and id are numbers
- * make sure that the name is char
 */
 typedef struct
 {
@@ -78,9 +76,6 @@ void *insert_student_values(int *, int, char *, char *, char *);
 Student get_student(int, char *, char *);
 void printf_students(Student, Grades *, int);
 int quantity_of_students(char *);
-
-/*Checking functions*/
-int is_Digit();
 
 /*File functions*/
 FILE *open_file(char *, char *);
@@ -279,21 +274,6 @@ char calculate_letters(char *file_name, Grades *student_grades, int quantity_eva
     }
     //return the letter so it can be inserted in the student file
     return letter_grade;
-}
-
-int is_Digit()
-{
-    int number = 0;
-    do
-    {
-        /* code */
-        scanf("%d", &number);
-        if (isdigit(number) == 0)
-        {
-            printf("Invalid value. Try Again!\n");
-        }
-    } while (isdigit(number) == 0);
-    return number;
 }
 
 /*File functions*/
