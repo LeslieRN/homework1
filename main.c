@@ -39,7 +39,7 @@ int main()
     int number_eval = 0, quantity_students = 0, option = 0, menu_option = 0;
     char *binay_file = "binary_file.dat";
     char *binay_file2 = "binary_file_eval.dat";
-
+    char *binay_file3 = "binary_file_grades.dat";
     do
     {
         printf("WELCOME TO THE STUDENTS REGISTER!\n");
@@ -49,7 +49,6 @@ int main()
         printf("3 -> Display student\n");
         printf("4 -> Delete all data\n");
         scanf("%d", &menu_option);
-        printf("Hey i'm here!! %d\n", menu_option);
         switch (menu_option)
         {
         case 1:
@@ -59,27 +58,33 @@ int main()
             break;
         case 2:
             //check if evaluation is emty
-            /*if(check_if_emty(binay_file2))
+            if (quantity_of_evaluation(binay_file2) == 0)
             {
                 /* the file evaluation is empty*/
-            //printf("You need to insert evaluations first\n");
-            //}
-            //else
-            //{*/
-            //add the counter for number eval
-            //insert student
-            insert_student_values(&quantity_students, number_eval, binay_file, binay_file2);
-            //}
+                printf("You need to insert evaluations first\n");
+            }
+            else
+            {
+                //add the counter for number eval
+                number_eval = quantity_of_evaluation(binay_file2);
+                //insert student
+                insert_student_values(&quantity_students, number_eval, binay_file, binay_file2, binay_file3);
+            }
 
             break;
         case 3:
             //display the data
-            show_student_file(binay_file, number_eval);
+            number_eval = quantity_of_evaluation(binay_file2);
+            printf("%-10s%-30s ", "id", "name");
+            show_description(binay_file2, number_eval);
+            printf("%-15s\n", "letter");
+            show_student_file(binay_file, binay_file3, number_eval);
             break;
         case 4:
             //delete all data
             close_file(open_file(binay_file, "w+b"));
             close_file(open_file(binay_file2, "w+b"));
+            close_file(open_file(binay_file3, "w+b"));
             break;
         default:
             printf("Error :(!! Try again\n");
